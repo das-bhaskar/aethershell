@@ -41,7 +41,8 @@ LIBS	:= -lnds9
 
 LIBS += -ldswifi9
 
-
+# -lfat: Required for reading the .env file from the SD card
+LIBS    += -lfat 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib

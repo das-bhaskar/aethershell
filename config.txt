@@ -1,0 +1,2 @@
+SERVER_HOST=0d73f1232f32.ngrok-free.app
+SERVER_PORT=80
