@@ -1,21 +1,29 @@
 package bhaskar.aethershell.hub.controller;
 
+import bhaskar.aethershell.hub.service.PythonBridgeService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/session")
 public class DsController {
 
+    @Autowired
+    private PythonBridgeService pythonBridge;
+
     /**
-     * Storage:
-     * Key: Session ID (e.g., "909d4725")
-     * Value: A list where each entry is one full frame of coordinate data
+     * Storage for Raw Data from NDS
+     * Key: Session ID, Value: List of coordinate strings (Frames)
      */
     private final ConcurrentHashMap<String, List<String>> activeSessions = new ConcurrentHashMap<>();
+
+    /**
+     * Storage for Final Results from Python/Gemini
+     * This is what the iPhone will eventually poll to get the AI guess and image links
+     */
+    private final ConcurrentHashMap<String, Map<String, Object>> sessionResults = new ConcurrentHashMap<>();
 
     // Tracks the current active session globally for the DS
     private String currentSessionId = null;
@@ -28,7 +36,6 @@ public class DsController {
 
         System.out.println("\n--- NEW SESSION INITIALIZED ---");
         System.out.println("ID: " + currentSessionId);
-        System.out.println("Status: Awaiting Frame Data...");
         System.out.println("--------------------------------\n");
 
         return currentSessionId;
@@ -38,54 +45,52 @@ public class DsController {
     @PostMapping("/frame")
     public String receiveFrame(@RequestBody String coordinateString) {
         if (currentSessionId == null) {
-            System.out.println("[!] REJECTED: DS attempted to send frame without starting session.");
             return "Error: Start session first.";
         }
 
-        // Clean the data (remove any trailing semicolons or spaces)
         String data = coordinateString.trim();
         if (data.isEmpty()) return "Error: Empty frame.";
 
-        // Store the data in the list for this session
         activeSessions.get(currentSessionId).add(data);
 
-        // Verification: Count how many points we actually got
-        String[] points = data.split(";");
-
-        // Print the entire raw coordinate string to the console
-        String preview = coordinateString;
-        System.out.println("FULL RAW DATA RECEIVED: " + preview);
-
-        System.out.println("[" + currentSessionId + "] RECEIVED FRAME " + activeSessions.get(currentSessionId).size());
-        System.out.println("    Points: " + points.length);
-        System.out.println("    Data Preview: " + preview);
-
-        return "Frame Stored Successfully";
+        System.out.println("[" + currentSessionId + "] Frame " + activeSessions.get(currentSessionId).size() + " received.");
+        return "Frame Stored";
     }
 
-    // 3. FINALIZE: Triggered by (X) on DS
+    // 3. FINALIZE & PROCESS: Triggered by (X) on DS
     @GetMapping("/done")
-    public String finalizeSession() {
+    public Map<String, Object> finalizeSession() {
         if (currentSessionId == null || !activeSessions.containsKey(currentSessionId)) {
-            return "No active session found.";
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "No active session found");
+            return error;
         }
 
         List<String> allFrames = activeSessions.get(currentSessionId);
-        int frameCount = allFrames.size();
 
-        System.out.println("\n--- SESSION COMPLETE ---");
-        System.out.println("Finalizing Session: " + currentSessionId);
-        System.out.println("Total Frames Collected: " + frameCount);
-        System.out.println("Ready for Python Animation Worker.");
-        System.out.println("------------------------\n");
+        System.out.println("\n--- TRIGGERING TRIPLE-GATE WORKER (Port 5001) ---");
 
-        // Note: We keep the data in activeSessions so Python can fetch it
-        // Or we can trigger a Python ProcessBuilder here.
+        // This calls the Python Flask server we built
+        Map<String, Object> result = pythonBridge.callPythonWorker(currentSessionId, allFrames);
 
-        return "Success: " + frameCount + " frames ready for processing.";
+        if (result != null) {
+            // Save the result so the iPhone can fetch it later by ID
+            sessionResults.put(currentSessionId, result);
+            System.out.println(" AI Interpretation: " + result.get("ai_description"));
+        } else {
+            System.out.println(" Python Bridge failed to return a result.");
+        }
+
+        return result;
     }
 
-    // 4. HELPER: To allow Python (or a browser) to see the data
+    // 4. IPHONE ENDPOINT: The iPhone app calls this to see if the AI is done
+    @GetMapping("/results/{id}")
+    public Map<String, Object> getResults(@PathVariable String id) {
+        return sessionResults.getOrDefault(id, Collections.singletonMap("status", "processing"));
+    }
+
+    // 5. DEBUG: View raw data
     @GetMapping("/data/{id}")
     public List<String> getSessionData(@PathVariable String id) {
         return activeSessions.getOrDefault(id, new ArrayList<>());
