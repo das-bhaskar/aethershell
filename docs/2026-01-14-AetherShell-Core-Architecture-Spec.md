@@ -1,4 +1,5 @@
-# Project AetherShell: Technical Specification
+# AetherShell Developer Log 02
+## Project AetherShell: Technical Specification
 
 **Version:** 1.0  
 **Date:** 2026-01-14  
