@@ -9,7 +9,8 @@
 - **Hardware:** Nintendo DS (ARM9)
 - **Infrastructure:** ngrok Free Tier (Tunneling) + Local Flask Server (Python 3.10)
 - **Network Protocol:** HTTP/1.1 over Plaintext TCP Sockets.
-- **Physical Layer:** Open WiFi Network. (DS hardware lacks WPA2/3 support; WEP was unavailable, so a non-encrypted Access Point was used for initial testing).
+- **Physical Layer (The WiFi Compromise):** - The NDS hardware natively supports only **WEP** or **Open** (unencrypted) networks.
+  - Since WEP is deprecated and unavailable on modern routers, an **Open, Hidden SSID** was used as the gateway. This bypasses the DS's lack of WPA2/WPA3 support while maintaining a basic layer of "security through obscurity."
 
 ---
 
@@ -42,6 +43,7 @@ To achieve this bridge, we utilized the following stacks:
 
 ### Trial & Error Notes
 
+- **Hardware Limitations:** Attempted various WPA-to-WEP bridges, but ultimately settled on a **Hidden Open SSID** as the only stable method for the 802.11b radio in the DS.
 - **DNS Resolution:** Initially, DNS resolution was a failure point. Ensuring `Wifi_InitDefault` was fully associated before calling `gethostbyname` was the fix.
 - **Payload Limits:** Discovered that large HTTP responses can overflow the small 1024-byte buffer. Responses must stay lightweight (plaintext is best).
 - **CRLF Necessity:** The HTTP protocol requires strict `\r\n` (Carriage Return + Line Feed) endings for headers. Standard `\n` caused 400 Bad Request errors on the Flask side.
@@ -54,4 +56,5 @@ To achieve this bridge, we utilized the following stacks:
 - [x] Resolved public DNS via NDS.
 - [x] Successfully bypassed ngrok security walls via custom headers.
 - [x] Forced plaintext HTTP scheme to accommodate DS hardware limitations.
+- [x] Established connectivity via Hidden Open Access Point.
 - [x] Received plaintext response from Python backend on the NDS console.
