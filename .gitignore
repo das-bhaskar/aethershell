@@ -85,6 +85,11 @@ build/
 ### VS Code ###
 .vscode/
 
+# Ignore generated NDS frames
+src/main/resources/static/output/*
+!src/main/resources/static/output/.gitkeep
 
+# Also ignore the build target outputs
+target/classes/static/output/*
 
 EOF
