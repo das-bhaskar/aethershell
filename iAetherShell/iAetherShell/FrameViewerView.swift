@@ -11,66 +11,83 @@ import SwiftUI
 struct FrameViewerView: View {
     let baseURL: String
     let sessionID: String
+    
+    // We keep these to handle the data loading
     @State private var frames: [UIImage] = []
-    @State private var currentIndex = 0
-    @State private var timer: Timer?
+    @State private var isLoading = true
 
     var body: some View {
-        VStack {
-            if frames.isEmpty {
-                Text("Loading frames...")
-                    .font(.headline)
-                    .padding()
+        ZStack {
+            if isLoading {
+                // While downloading, show a simple loading state
+                VStack(spacing: 20) {
+                    ProgressView()
+                        .scaleEffect(1.5)
+                    Text("Fetching NDS Sketches...")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                }
             } else {
-                GeometryReader { geo in
-                    Image(uiImage: frames[currentIndex])
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: geo.size.width, height: geo.size.height)
-                        .background(Color.clear)
+                // THE AR WORLD
+                // This replaces the old 2D Image logic
+                ARContainer(frames: $frames)
+                    .edgesIgnoringSafeArea(.all)
+                
+                // UI Overlay
+                VStack {
+                    HStack {
+                        Text("AR Active: \(sessionID)")
+                            .font(.caption)
+                            .padding(8)
+                            .background(.ultraThinMaterial)
+                            .cornerRadius(8)
+                        Spacer()
+                    }
+                    .padding()
+                    
+                    Spacer()
+                    
+                    Text("Point at a table or wait for fallback...")
+                        .font(.footnote)
+                        .padding()
+                        .background(.black.opacity(0.5))
+                        .foregroundColor(.white)
+                        .cornerRadius(20)
+                        .padding(.bottom, 30)
                 }
             }
         }
         .onAppear {
             loadFrames()
         }
-        .onDisappear {
-            timer?.invalidate()
-        }
-        .navigationTitle("Session \(sessionID)")
+        .navigationTitle("AetherShell AR")
         .navigationBarTitleDisplayMode(.inline)
     }
 
     func loadFrames() {
-        let maxFrames = 50 // adjust depending on session
-        var loadedFrames = 0
+        let maxFrames = 50
+        let group = DispatchGroup()
+        var tempFrames: [UIImage] = []
 
         for i in 0..<maxFrames {
             let urlStr = "\(baseURL)/output/\(sessionID)_frame_\(i).png"
             guard let url = URL(string: urlStr) else { continue }
 
-            URLSession.shared.dataTask(with: url) { data, response, error in
+            group.enter()
+            URLSession.shared.dataTask(with: url) { data, _, _ in
                 if let data = data, let img = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        frames.append(img)
-                        loadedFrames += 1
-
-                        // Start looping timer once first frame loads
-                        if loadedFrames == 1 {
-                            startLooping()
-                        }
-                    }
+                    tempFrames.append(img)
                 }
+                group.leave()
             }.resume()
         }
-    }
 
-    func startLooping() {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            withAnimation(.linear(duration: 0.05)) {
-                currentIndex = (currentIndex + 1) % frames.count
+        // Once all images are downloaded, update the UI
+        group.notify(queue: .main) {
+            if !tempFrames.isEmpty {
+                self.frames = tempFrames
+                self.isLoading = false
             }
         }
     }
 }
-
