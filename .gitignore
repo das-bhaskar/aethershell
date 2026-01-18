@@ -197,6 +197,19 @@ DerivedData
 *.swp
 *.swo
 
+# Log files
+*.log
+.hub_output.log
+
+# Connection data
+CONNECTION_INFO.txt
+Handshake.txt
+
+# Mac system files
+.DS_Store
+
+# User-specific config
+config.txt
 
 
 EOF

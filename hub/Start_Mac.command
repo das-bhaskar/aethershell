@@ -1,7 +1,7 @@
 #!/bin/bash
 cd -- "$(dirname "$BASH_SOURCE")"
 VISIBLE_DIR="$PWD"
-BASE_DIR="$PWD/.backend"
+BASE_DIR="$PWD/backend"
 LOG_FILE="$BASE_DIR/.hub_output.log"
 INFO_FILE="$VISIBLE_DIR/CONNECTION_INFO.txt"
 
@@ -12,9 +12,13 @@ echo "------------------------------------------------"
 
 # 1. Reset & Cleanup
 echo "[0/2] Cleaning up background processes..."
+chmod +x ./backend/vision_engine
+chmod +x ./backend/ngrok
+chmod +x ./backend/cloudflared
 pkill -f "hub.jar"
 pkill -f "vision_engine"
 pkill -f "cloudflared"
+pkill -f "ngrok"
 # This clears the port if a previous crash left it stuck
 lsof -ti:5001 | xargs kill -9 > /dev/null 2>&1
 > "$LOG_FILE"
@@ -33,10 +37,11 @@ java -Dspring.web.resources.static-locations="file:$BASE_DIR/static/" \
      -jar "hub.jar" > "$LOG_FILE" 2>&1 &
 JAVA_PID=$!
 
-# 4. Wait for Tunnel Connection
+# 4. Wait for Tunnel Connections
 cd "$VISIBLE_DIR"
-echo "[SYSTEM] Establishing Cloudflare Tunnel..."
-while ! grep -q "SERVER_HOST" "$LOG_FILE" || ! grep -q "trycloudflare.com" "$LOG_FILE"; do
+echo "[SYSTEM] Establishing Tunnels..."
+# Wait until BOTH Cloudflare and Ngrok have printed their URLs
+while ! grep -q "trycloudflare.com" "$LOG_FILE" || ! grep -q "ngrok-free.app" "$LOG_FILE"; do
     if ! kill -0 $JAVA_PID 2>/dev/null; then
         echo "CRITICAL ERROR: Java Hub failed to start. Check $LOG_FILE"
         exit 1

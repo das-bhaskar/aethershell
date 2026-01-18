@@ -35,43 +35,37 @@ public class DsController {
         System.out.println("\n--- AETHERSHELL HUB STARTING ---");
 
         // 1. Setup Python Sandbox & Run Worker (Safe for Users)
-        setupAndRunPython();
+        //setupAndRunPython();
 
         // 2. Launch Tunnels (Handles local binaries or system brew)
         startTunnel("cloudflared", "tunnel", "--url", "http://localhost:8443");
         startTunnel("ngrok", "http", "8080", "--scheme", "http", "--log=stdout");    }
 
-    private void setupAndRunPython() {
+ /*   private void setupAndRunPython() {
         new Thread(() -> {
             try {
                 String root = System.getProperty("user.dir");
-                File venvDir = new File(root, "venv");
-                String pipPath = root + "/venv/bin/pip3";
-                String pythonPath = root + "/venv/bin/python3";
-                // This points to the requirements.txt in your hub folder
-                String requirementsPath = root + "/requirements.txt";
+                // Check if we are in "Release Mode" (executable exists)
+                // or "Dev Mode" (app.py exists)
+                File visionEngine = new File(root, "vision_engine");
+                File pythonScript = new File(root, "app.py");
 
-                if (!venvDir.exists()) {
-                    System.out.println("[SYSTEM] Creating private Python sandbox (venv)...");
-                    new ProcessBuilder("python3", "-m", "venv", "venv").inheritIO().start().waitFor();
-
-                    System.out.println("[SYSTEM] Installing dependencies from requirements.txt...");
-                    // Use the -r flag to install everything in your text file at once
-                    new ProcessBuilder(pipPath, "install", "-r", requirementsPath)
-                            .inheritIO()
-                            .start()
-                            .waitFor();
+                if (visionEngine.exists()) {
+                    System.out.println("[SYSTEM] Portable Vision Engine detected. Launching...");
+                    new ProcessBuilder("./vision_engine").inheritIO().start();
+                } else if (pythonScript.exists()) {
+                    System.out.println("[SYSTEM] Dev mode detected. Running app.py...");
+//f0r development
+                    new ProcessBuilder("python3", "app.py").inheritIO().start();
+                } else {
+                    System.err.println("[ERROR] No Python worker found (checked for vision_engine and app.py)");
                 }
-
-                System.out.println("[SYSTEM] Starting Python Worker from sandbox...");
-                ProcessBuilder pb = new ProcessBuilder(pythonPath, "app.py");
-                pb.inheritIO();
-                pb.start();
             } catch (Exception e) {
-                System.err.println("[ERROR] Python Sandbox Failed: " + e.getMessage());
+                System.err.println("[ERROR] Python Startup Failed: " + e.getMessage());
             }
-        }).start();}
-
+        }).start();
+    }
+*/
     private void startTunnel(String binName, String... args) {
         new Thread(() -> {
             try {
