@@ -12,7 +12,7 @@ By connecting 20-year-old handheld hardware to a modern app, your drawings are i
 ## Get Started Now
 The first stable release for macOS is now live.
 
-[**Download AetherShell v1.0.0 for macOS**](https://github.com/das-bhaskar/aethershell/releases/tag/v1.0.0)
+[**Download AetherShell v1.0.2 for macOS**](https://github.com/das-bhaskar/aethershell/releases/tag/v1.0.2)
 
 Support for Windows and Linux is currently in development and coming soon.
 
