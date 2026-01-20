@@ -5,6 +5,8 @@
 AetherShell is an open-source platform that brings your Nintendo DSi sketches to life over the internet. 
 By connecting 20-year-old handheld hardware to a modern app, your drawings are interpreted, animated, made to dance & projected into your physical space using AR.
 
+[![AetherShell Demo](https://img.youtube.com/vi/I389PbAJmVE/0.jpg)](https://www.youtube.com/watch?v=I389PbAJmVE)
+
 ---
 *AetherShell is an unofficial fan project. Please read the [Legal Disclaimer](DISCLAIMER.md) regarding third-party tools and Nintendo trademarks.*
 ---
