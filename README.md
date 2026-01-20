@@ -2,6 +2,10 @@
 
 **The first ever bridge between the Nintendo DSi and Augmented Reality.**
 
+<p align="left">
+  <img src="https://img.shields.io/badge/Open_Source-AetherShell-brightgreen?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="AetherShell Open Source" height="50">
+</p>
+
 AetherShell is an open-source platform that brings your Nintendo DSi sketches to life over the internet. 
 By connecting 20-year-old handheld hardware to a modern app, your drawings are interpreted, animated, made to dance & projected into your physical space using AR.
 
@@ -14,7 +18,11 @@ By connecting 20-year-old handheld hardware to a modern app, your drawings are i
 ## Get Started Now
 The first stable release for macOS is now live.
 
-[**Download AetherShell v1.0.2 for macOS**](https://github.com/das-bhaskar/aethershell/releases/tag/v1.0.2)
+<p align="left">
+  <a href="https://github.com/das-bhaskar/AetherShell/releases/tag/v1.0.2">
+    <img src="https://img.shields.io/badge/DOWNLOAD-AetherShell_v1.0.2-blue?style=for-the-badge&logo=github&logoColor=white" alt="Download AetherShell" height="50">
+  </a>
+</p>
 
 Support for Windows and Linux is currently in development and coming soon.
 
