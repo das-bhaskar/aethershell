@@ -2,6 +2,12 @@
 
 **The first ever bridge between the Nintendo DSi and Augmented Reality.**
 
+| [ ![Hackaday Featured](https://img.shields.io/badge/Featured%20on-Hackaday-black?style=for-the-badge&logo=hackaday&logoColor=white) ](https://hackaday.com/2026/01/25/augmented-reality-project-utilizes-the-ancient-nintendo-dsi/) |
+| :--- |
+| **"Sometimes it’s really fun to play with an old console and do weird things with it... We love to see more."** — *Hackaday* |
+
+---
+
 <p align="left">
   <img src="https://img.shields.io/badge/Open_Source-AetherShell-brightgreen?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="AetherShell Open Source" height="50">
 </p>
